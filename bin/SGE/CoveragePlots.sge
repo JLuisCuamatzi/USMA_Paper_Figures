@@ -1,0 +1,35 @@
+#!/bin/sh
+#$ -S /bin/bash
+#$ -cwd
+#$ -e /mnt/Timina/lmorales/Public/Ustilago/C1/Paper/bin/log/CoveragePlot.error
+#$ -o /mnt/Timina/lmorales/Public/Ustilago/C1/Paper/bin/log/CoveragePlot.out
+#$ -N CoveragePlot
+#$ -M jcuamatzi@liigh.unam.mx
+#$ -m e
+#$ -l vf=16G
+#$ -pe openmp 10
+
+
+# how to execute this script:
+# qsub /mnt/Timina/lmorales/Public/Ustilago/C1/Paper/bin/SGE/CoveragePlots.sge
+
+module load r/3.6.1
+
+cd /mnt/Timina/lmorales/Public/Ustilago/C1/Paper/data/Coverage/RawDepthCoverageQ30
+
+for i in *.Q30.depth.gz
+do
+    COVERAGE_FILE=$i                        # Input file
+    SAMPLE=`basename ${i} .Q30.depth.gz`    # extract the sample ID from each file with coverage data
+    WINDOW=1000                             # set the window size
+    STEP=1000                               # set the step size
+    WINDOW_KB=`echo $(($WINDOW/1000))`      # estimate the window size in kb
+    OUTPUT_NORM_COV=../NormalizedCoverageQ30/"${SAMPLE}_NormalizedCoverage_${WINDOW_KB}kb.txt"  # define path and output table
+    #PLOT1=
+    #PLOT2=
+    echo "Start analysis for ${SAMPLE}"
+    R CMD BATCH --no-save --no-restore "--args COVERAGE_FILE='${COVERAGE_FILE}' WINDOW='${WINDOW}' STEP='${STEP}' SAMPLE='${SAMPLE}' NORM_TABLE='${OUTPUT_NORM_COV}'" /mnt/Timina/lmorales/Public/Ustilago/C1/Paper/bin/RScripts/CoveragePlotR.R /mnt/Timina/lmorales/Public/Ustilago/C1/Paper/bin/RScripts/log/CoveragePlotR_log_${SAMPLE}.Rout
+    echo "End analysis for ${SAMPLE}"
+done
+
+
